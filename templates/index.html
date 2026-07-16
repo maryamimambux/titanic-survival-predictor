@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Titanic Survival Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0B1F3A;
+            --brass: #C9A227;
+            --brass-dark: #A6841D;
+            --bg: #F3F4F6;
+            --ink: #1A1D23;
+            --muted: #6B7280;
+            --line: #E3E5E9;
+            --survive: #2F6F4E;
+            --sink: #9A3B3B;
+        }
+ 
+        * { box-sizing: border-box; }
+ 
+        html, body { min-height: 100%; }
+ 
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 64px 20px 0;
+        }
+ 
+        .wrap {
+            width: 100%;
+            max-width: 620px;
+            flex: 1;
+        }
+ 
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(11, 31, 58, 0.07);
+            color: var(--navy);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+        }
+ 
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0 0 12px;
+            letter-spacing: -0.3px;
+        }
+ 
+        .subtext {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 480px;
+            margin: 0 0 40px;
+        }
+ 
+        .panel {
+            background: #fff;
+            border: 1.5px dashed var(--line);
+            border-radius: 16px;
+            padding: 32px;
+        }
+ 
+        .row { display: flex; gap: 16px; }
+        .row .field { flex: 1; }
+ 
+        .field { margin-bottom: 20px; }
+ 
+        .field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+ 
+        select, input[type="number"] {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--ink);
+            background: #FAFAFA;
+            transition: border-color 0.15s ease;
+        }
+ 
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--brass);
+            background: #fff;
+        }
+ 
+        .submit-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+ 
+        button {
+            padding: 13px 32px;
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+ 
+        button:hover { background: #132A4D; }
+ 
+        .result {
+            margin-top: 24px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+ 
+        .result.survived {
+            background: rgba(47, 111, 78, 0.08);
+            color: var(--survive);
+            border: 1.5px solid rgba(47, 111, 78, 0.2);
+        }
+ 
+        .result.sank {
+            background: rgba(154, 59, 59, 0.07);
+            color: var(--sink);
+            border: 1.5px solid rgba(154, 59, 59, 0.2);
+        }
+ 
+        .result svg { width: 20px; height: 20px; flex-shrink: 0; }
+ 
+        footer {
+            width: 100%;
+            margin-top: 80px;
+            padding: 22px 20px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+ 
+        footer .links { margin-top: 6px; }
+ 
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            margin: 0 6px;
+        }
+ 
+        footer a:hover {
+            color: var(--navy);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="eyebrow">⚓ Machine Learning Project</div>
+        <h1>Will this passenger survive?</h1>
+        <p class="subtext">
+            Enter a passenger's details from the Titanic and a trained model will
+            predict whether they would have survived, based on patterns learned
+            from real passenger records.
+        </p>
+ 
+        <div class="panel">
+            <form method="POST" action="/predict">
+                <div class="row">
+                    <div class="field">
+                        <label>Passenger class</label>
+                        <select name="pclass">
+                            <option value="1" {% if request.form.get('pclass', '3') == '1' %}selected{% endif %}>1st</option>
+                            <option value="2" {% if request.form.get('pclass', '3') == '2' %}selected{% endif %}>2nd</option>
+                            <option value="3" {% if request.form.get('pclass', '3') == '3' %}selected{% endif %}>3rd</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Sex</label>
+                        <select name="sex">
+                            <option value="male" {% if request.form.get('sex', 'male') == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if request.form.get('sex', 'male') == 'female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                </div>
+ 
+                <div class="row">
+                    <div class="field">
+                        <label>Age</label>
+                        <input type="number" name="age" value="{{ request.form.get('age', 30) }}">
+                    </div>
+                    <div class="field">
+                        <label>Fare paid (£)</label>
+                        <input type="number" step="0.01" name="fare" value="{{ request.form.get('fare', 32.00) }}">
+                    </div>
+                </div>
+ 
+                <div class="row">
+                    <div class="field">
+                        <label>Siblings / spouses aboard</label>
+                        <input type="number" name="sibsp" value="{{ request.form.get('sibsp', 0) }}">
+                    </div>
+                    <div class="field">
+                        <label>Parents / children aboard</label>
+                        <input type="number" name="parch" value="{{ request.form.get('parch', 0) }}">
+                    </div>
+                </div>
+ 
+                <div class="row">
+                    <div class="field">
+                        <label>Embarked at Queenstown</label>
+                        <select name="embarked_q">
+                            <option value="0" {% if request.form.get('embarked_q', '0') == '0' %}selected{% endif %}>No</option>
+                            <option value="1" {% if request.form.get('embarked_q', '0') == '1' %}selected{% endif %}>Yes</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Embarked at Southampton</label>
+                        <select name="embarked_s">
+                            <option value="0" {% if request.form.get('embarked_s', '1') == '0' %}selected{% endif %}>No</option>
+                            <option value="1" {% if request.form.get('embarked_s', '1') == '1' %}selected{% endif %}>Yes</option>
+                        </select>
+                    </div>
+                </div>
+ 
+                <div class="submit-row">
+                    <button type="submit">Predict outcome</button>
+                </div>
+            </form>
+ 
+            {% if prediction == "Survived" %}
+            <div class="result survived">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>
+                </svg>
+                Prediction: Survived
+            </div>
+            {% elif prediction %}
+            <div class="result sank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>
+                </svg>
+                Prediction: Did not survive
+            </div>
+            {% endif %}
+        </div>
+    </div>
+ 
+    <footer>
+        <div>&copy; 2026 Titanic Survival Predictor. All rights reserved.</div>
+        <div class="links">
+            <a href="https://github.com/maryamimambux" target="_blank">GitHub</a>
+            ·
+            <a href="https://www.linkedin.com/in/maryam-imam-394455342/" target="_blank">LinkedIn</a>
+        </div>
+    </footer>
+</body>
+</html>
+ 
